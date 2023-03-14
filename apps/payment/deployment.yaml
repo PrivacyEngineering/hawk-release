@@ -19,6 +19,8 @@ spec:
         name: payment
         app: payment
         version: v1
+      annotations:
+        sidecar.istio.io/extraStatTags: gcp_location,http_method
     spec:
       containers:
       - name: payment

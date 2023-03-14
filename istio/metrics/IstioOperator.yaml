@@ -1,0 +1,98 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+spec:
+  meshConfig:
+    defaultConfig:
+      extraStatTags:
+        - gcp_location
+        - http_method
+      proxyStatsMatcher:
+        inclusionPrefixes:
+          - istio_gcp_location_not_europe
+          - istio_destination_country_not_eu
+  values:
+    telemetry:
+      v2:
+        prometheus:
+          configOverride:
+            inboundSidecar:
+              definitions:
+                - name: gcp_location_not_europe
+                  type: "COUNTER"
+                  value: "(node.metadata.PLATFORM_METADATA['gcp_location'].startsWith('europe') ? 0 : 1)"
+                - name: destination_country_not_eu
+                  type: "COUNTER"
+                  value: "(request.headers['is_eu'] == false ? 1 : 0)"
+              metrics:
+                - name: requests_total
+                  dimensions:
+                    http_method: http_method
+                  tags_to_remove:
+                    - reporter
+                    - source_namespace
+                    - source_workload
+                    - source_workload_namespace
+                    - source_principal
+                    - source_app
+                    - source_version
+                    - source_cluster
+                    - destination_namespace
+                    - destination_workload
+                    - destination_workload_namespace
+                    - destination_principal
+                    - destination_app
+                    - destination_version
+                    - destination_service
+                    - destination_service_namespace
+                    - destination_port
+                    - destination_cluster
+                    - request_protocol
+                    - request_operation
+                    - request_host
+                    - response_flags
+                    - grpc_response_status
+                    - connection_security_policy
+                    - source_canonical_service
+                    - destination_canonical_service
+                    - source_canonical_revision
+                    - destination_canonical_revision
+                - name: my_custom_metric
+                  dimensions:
+                    gcp_location: node.metadata.PLATFORM_METADATA['gcp_location']
+            outboundSidecar:
+              metrics:
+                - name: requests_total
+                  dimensions:
+                    http_method: http_method
+                  tags_to_remove:
+                    - reporter
+                    - source_namespace
+                    - source_workload
+                    - source_workload_namespace
+                    - source_principal
+                    - source_app
+                    - source_version
+                    - source_cluster
+                    - destination_namespace
+                    - destination_workload
+                    - destination_workload_namespace
+                    - destination_principal
+                    - destination_app
+                    - destination_version
+                    - destination_service
+                    - destination_service_namespace
+                    - destination_port
+                    - destination_cluster
+                    - request_protocol
+                    - request_operation
+                    - request_host
+                    - response_flags
+                    - grpc_response_status
+                    - connection_security_policy
+                    - source_canonical_service
+                    - destination_canonical_service
+                    - source_canonical_revision
+                    - destination_canonical_revision
+                - name: my_custom_metric
+                  dimensions:
+                    gcp_location: node.metadata.PLATFORM_METADATA['gcp_location']

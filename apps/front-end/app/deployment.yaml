@@ -18,6 +18,7 @@ spec:
     metadata:
       annotations:
         prometheus.io/scrape: "true"
+        sidecar.istio.io/extraStatTags: gcp_location,http_method
       labels:
         app: frontend
     spec:

@@ -20,6 +20,8 @@ spec:
         name: catalogue
         app: catalogue
         version: v1
+      annotations:
+        sidecar.istio.io/extraStatTags: gcp_location,http_method
     spec:
       containers:
       - name: catalogue
