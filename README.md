@@ -15,11 +15,11 @@ Furthermore, it contains several configurations of the service mesh to create cu
 Flux is a tool which provides an operator for pull-based synchronization of infrastructure sources saved in git repositories, for instance, and the running Kubernetes cluster (visit https://fluxcd.io/flux/ for detailed information).
 
 To install Flux in a GitHub repository export the following:
-
-export GITHUB_USER=<your-username>\
-export GITHUB_REPOSITORY=<your-repository>\
-export GITHUB_BRANCH=<your-branch>
-
+```shell
+export GITHUB_USER=<<your-username>>
+export GITHUB_REPOSITORY=<<your-repository>>
+export GITHUB_BRANCH=<<your-branch>>
+```
 and then run the following command:
 ```shell
 flux bootstrap github --components-extra=image-reflector-controller,image-automation-controller --owner=GITHUB_USER --repository=GITHUB_REPOSITORY --path=./flux --branch=GITHUB_BRANCH
