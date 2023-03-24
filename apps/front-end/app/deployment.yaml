@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: europe-west3-docker.pkg.dev/cnpe-blue/sockshop/front-end:1.0.4 # {"$imagepolicy": "flux-system:frontend"}
+        image: weaveworksdemos/front-end:0.3.12 # {"$imagepolicy": "flux-system:frontend"}
         imagePullPolicy: IfNotPresent
         resources:
           limits:

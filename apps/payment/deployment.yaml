@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: payment
-        image: europe-west3-docker.pkg.dev/cnpe-blue/sockshop/payment:latest
+        image: weaveworksdemos/payment:0.4.3
         resources:
           limits:
             cpu: 200m

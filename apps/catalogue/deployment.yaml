@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
       - name: catalogue
-        image: europe-west3-docker.pkg.dev/cnpe-blue/sockshop/catalogue:latest
+        image: weaveworksdemos/catalogue:0.3.5
         command: ["/app"]
         args:
         - -port=8080
