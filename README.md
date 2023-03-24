@@ -17,9 +17,14 @@ Flux is a tool which provides an operator for pull-based synchronization of infr
 To install Flux in a GitHub repository export the following:
 ```shell
 export GITHUB_USER=<<your-username>>
+```
+```shell
 export GITHUB_REPOSITORY=<<your-repository>>
+```
+```shell
 export GITHUB_BRANCH=<<your-branch>>
 ```
+
 and then run the following command:
 ```shell
 flux bootstrap github --components-extra=image-reflector-controller,image-automation-controller --owner=GITHUB_USER --repository=GITHUB_REPOSITORY --path=./flux --branch=GITHUB_BRANCH
