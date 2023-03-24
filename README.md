@@ -1,4 +1,4 @@
-#Hawk Release
+# Hawk Release
 
 This repository contains all needed Kubernetes resources to set up a full-fledged GitOps-based CD pipeline with following features: 
 * Automated cluster synchronization
@@ -10,22 +10,22 @@ This repository contains all needed Kubernetes resources to set up a full-fledge
 
 Furthermore, it contains several configurations of the service mesh to create custom privacy-related metrics. 
 
-##Flux setup
+## Flux setup
 
 Flux is a tool which provides an operator for pull-based synchronization of infrastructure sources saved in git repositories, for instance, and the running Kubernetes cluster (visit https://fluxcd.io/flux/ for detailed information).
 
 To install Flux in a GitHub repository export the following:
 
-<span style="color:#007020">export</span> <span style="color:#bb60d5">GITHUB_USER</span><span style="color:##666">=</span><your-username>\
-<span style="color:#007020">export</span> <span style="color:#bb60d5">GITHUB_REPOSITORY</span><span style="color:##666">=</span><your-repository>\
-<span style="color:#007020">export</span> <span style="color:#bb60d5">GITHUB_BRANCH</span><span style="color:##666">=</span><your-branch>
+export GITHUB_USER=<your-username>\
+export GITHUB_REPOSITORY=<your-repository>\
+export GITHUB_BRANCH=<your-branch>
 
 and then run the following command:
 ```shell
 flux bootstrap github --components-extra=image-reflector-controller,image-automation-controller --owner=GITHUB_USER --repository=GITHUB_REPOSITORY --path=./flux --branch=GITHUB_BRANCH
 ```
 
-##Flagger and Istio setup
+## Flagger and Istio setup
 
 Flagger provides different Kubernetes CRDs for realizing different release strategies. This project uses them for enabling canary releases.
 
@@ -55,7 +55,7 @@ kubectl appply -f flagger-metrics.yaml
 
 Now all necessary tools to test the features mentioned above are set up. Some sources have to be customized (paths, webhooks, secrets etc.). We applied all tools to the Front End service in the apps folder exemplary.
 
-##Other useful commands
+## Other useful commands
 
 To encrypt a Secret run the following from the root dir:
 ```shell
