@@ -10,9 +10,9 @@ gcloud auth application-default login
 ``` 
 or by Providing a service account json as an environment variable (run it in the dir with the json file):
 ```shell
-export GOOGLE_CREDENTIALS="$(cat <<your json file>>)"
+export GOOGLE_CREDENTIALS="$(cat <<your_json_file>>)"
 ``` 
-or any other method
+or any other method.
 
 ## Start
 
@@ -24,12 +24,17 @@ Then run the following command to apply your project-id:
 ```shell
 awk -v new_value="$GCP_PROJECT_ID" '/gcp_project_id/ {sub(/"toucan-378111"/, "\"" new_value "\"")} 1' ./terraform/terraform.tfvars > temp.tfvars && mv temp.tfvars ./terraform/terraform.tfvars
 ```
-Now remove the project specific terraform backend:
-```shell
-awk '/^ *cloud {/,/^ *} *$/ { if (NR <= FNR + 6) next } 1' terraform/main.tf > temp && mv temp terraform/main.tf
-```
+or set the gcp_project_id in the terraform.tfvars manually.
 
-The provided Terraform files can now used to create your Kubernetes cluster in your GCP project.
+[//]: # (Now remove the project specific terraform backend:)
+
+[//]: # (```shell)
+
+[//]: # (awk '/^ *cloud {/,/^ *} *$/ { if &#40;NR <= FNR + 6&#41; next } 1' terraform/main.tf > temp && mv temp terraform/main.tf)
+
+[//]: # (```)
+
+The provided Terraform files can now be used to create your Kubernetes cluster in your GCP project.
 
 Navigate to the terraform folder (cd terraform) and run the following commands:
 ```shell
