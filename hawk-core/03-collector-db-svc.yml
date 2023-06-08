@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: collector-db
+  labels:
+    name: collector-db
+    app: collector-db
+  namespace: hawk-ns
+spec:
+  ports:
+  - port: 5432
+    targetPort: 5432
+  selector:
+    name: collector-db
+    app: collector-db

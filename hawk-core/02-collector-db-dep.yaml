@@ -1,0 +1,45 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: collector-db-v1
+  labels:
+    name: collector-db
+    app: collector-db
+    version: v1
+  namespace: hawk-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: collector-db
+      app: collector-db
+      version: v1
+  template:
+    metadata:
+      labels:
+        name: collector-db
+        app: collector-db
+        version: v1
+    spec:
+      containers:
+        - name: collector-db
+          image: postgres
+          env:
+            - name: POSTGRES_DB
+              value: "admin"
+            - name: POSTGRES_USER
+              value: "coll_user"
+            - name: POSTGRES_PASSWORD
+              value: "collector_pasword"
+          resources:
+            limits:
+              cpu: 700m
+              memory: 500Mi
+            requests:
+              cpu: 100m
+              memory: 200Mi
+          ports:
+            - containerPort: 5432
+      nodeSelector:
+        beta.kubernetes.io/os: linux

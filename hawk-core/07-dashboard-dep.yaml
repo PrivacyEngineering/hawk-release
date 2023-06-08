@@ -1,0 +1,38 @@
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: dashboard-v1
+#   labels:
+#     name: dashboard
+#     app: dashboard
+#     version: v1
+#   namespace: collector-ns
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       name: dashboard
+#       app: dashboard
+#       version: v1
+#   template:
+#     metadata:
+#       labels:
+#         name: dashboard
+#         app: dashboard
+#         version: v1
+#     spec:
+#       containers:
+#         - name: dashboard
+#           image: jmgoyesc/collector-dash
+#           resources:
+#             limits:
+#               cpu: 300m
+#               memory: 300Mi
+#             requests:
+#               cpu: 100m
+#               memory: 200Mi
+#           ports:
+#             - containerPort: 80
+#       nodeSelector:
+#         beta.kubernetes.io/os: linux

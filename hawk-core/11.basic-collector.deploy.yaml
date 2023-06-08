@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: collector-go-deployment
+  namespace: hawk-ns
+spec:
+  selector:
+    matchLabels:
+      app: collector-go
+  template:
+    metadata:
+      labels:
+        app: collector-go
+    spec:
+      containers:
+      - name: collector-go
+        image: jmgoyesc/collector-go
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
