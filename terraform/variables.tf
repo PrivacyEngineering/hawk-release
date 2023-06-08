@@ -14,7 +14,6 @@
 variable "gcp_project_id" {
   type        = string
   description = "The GCP project ID to apply this config to"
-  default = "toucan-378111"
 }
 
 variable "name" {
@@ -62,6 +61,12 @@ variable "filepath_sock_shop" {
   type        = string
   description = "Path to Sock Shop's Kubernetes resources, written using Kustomize"
   default     = "../apps/"
+}
+
+variable "filepath_istio" {
+  type        = string
+  description = "Path to Sock Shop's Kubernetes resources, written using Kustomize"
+  default     = "../istio/"
 }
 
 variable "node_count" {

@@ -9,24 +9,22 @@ terraform {
 }
 
 provider "google" {
-  project     = "toucan-378111"
-  region      = "us-east1"
-  zone        = "us-east1-c"
-  credentials = "toucan-378111-ca4ae827f2b9.json"
+  project     = var.gcp_project_id
+  region      = var.region
+  zone        = var.zone
 }
 
 provider "google-beta" {
   project     = var.gcp_project_id
   region      = var.region
   zone        = var.zone
-  credentials = "toucan-378111-ca4ae827f2b9.json"
 }
 
 module "enable_google_apis" {
   source  = "terraform-google-modules/project-factory/google//modules/project_services"
   version = "~> 14.0"
 
-  project_id                  = "toucan-378111"
+  project_id                  = var.gcp_project_id
   disable_services_on_destroy = false
 
   activate_apis = [
@@ -64,25 +62,44 @@ module "gcloud" {
   additional_components = ["kubectl", "beta"]
   create_cmd_entrypoint = "gcloud"
   create_cmd_body      = "container clusters get-credentials ${google_container_cluster.sock-shop.name} --zone=${var.region} --project=${var.gcp_project_id}"
-  depends_on = [
+  module_depends_on = [
     google_container_cluster.sock-shop
   ]
 }
 
-# Apply sock-shop namespace
-#resource "null_resource" "apply_namespace" {
-#  provisioner "local-exec" {
-#    interpreter = ["bash", "-exc"]
-#    command     = "kubectl apply -f ${var.filepath_sock_shop_namespace}"
-#  }
-#}
+resource "null_resource" "apply_istio" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "kubectl apply -k ${var.filepath_istio}"
+  }
+  depends_on = [
+    module.gcloud
+  ]
+}
+
+resource "null_resource" "apply_flagger" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "helm repo add flagger https://flagger.app"
+  }
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "kubectl apply -f https://raw.githubusercontent.com/fluxcd/flagger/main/artifacts/flagger/crd.yaml"
+  }
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "helm upgrade -i flagger flagger/flagger --namespace=istio-system --set crd.create=false --set meshProvider=istio --set metricsServer=http://prometheus:9090"
+  }
+  depends_on = [
+    module.gcloud, null_resource.apply_istio
+  ]
+}
 
 resource "null_resource" "apply_deployment" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
     command = "kubectl apply -k ../apps -n sock-shop"
   }
-
   depends_on = [
     module.gcloud
   ]
@@ -95,7 +112,7 @@ resource "null_resource" "wait_conditions" {
   }
 
   depends_on = [
-    null_resource.apply_deployment
+    module.gcloud, null_resource.apply_deployment
   ]
 }
 
