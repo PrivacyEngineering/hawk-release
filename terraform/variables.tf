@@ -66,7 +66,7 @@ variable "filepath_sock_shop" {
 variable "filepath_istio" {
   type        = string
   description = "Path to Sock Shop's Kubernetes resources, written using Kustomize"
-  default     = "../istio/"
+  default     = "../istio"
 }
 
 variable "node_count" {

@@ -67,13 +67,23 @@ module "gcloud" {
   ]
 }
 
-resource "null_resource" "apply_istio" {
+resource "null_resource" "install_istio" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command = "kubectl apply -k ${var.filepath_istio}"
+    command = "istioctl install -y"
   }
   depends_on = [
     module.gcloud
+  ]
+}
+
+resource "null_resource" "apply_istio" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "kubectl apply -k ${var.filepath_istio} -n istio-system"
+  }
+  depends_on = [
+    module.gcloud, null_resource.install_istio
   ]
 }
 
@@ -101,7 +111,7 @@ resource "null_resource" "apply_deployment" {
     command = "kubectl apply -k ../apps -n sock-shop"
   }
   depends_on = [
-    module.gcloud
+    module.gcloud, null_resource.apply_istio, null_resource.apply_flagger
   ]
 }
 
