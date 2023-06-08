@@ -1,4 +1,4 @@
-apiVersion: autoscaling/v2beta1
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: shipping
@@ -15,5 +15,7 @@ spec:
       resource:
         name: cpu
         # scale up if usage is above
-        # 99% of the requested CPU (100m)
-        targetAverageUtilization: 99
+        # 90% of the requested CPU (100m)
+        target:
+          averageUtilization: 90
+          type: Value

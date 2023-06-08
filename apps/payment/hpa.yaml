@@ -1,4 +1,4 @@
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: payment
@@ -11,11 +11,12 @@ spec:
 
   minReplicas: 1
   maxReplicas: 4
-
   metrics:
     - type: Resource
       resource:
         name: cpu
+        # scale up if usage is above
+        # 90% of the requested CPU (100m)
         target:
-          type: Utilization
           averageUtilization: 90
+          type: Value
