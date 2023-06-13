@@ -25,7 +25,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1m
-  url: https://github.com/TUB-CNPE-TB/kubernetes-deployment
+  url: https://github.com/PrivacyEngineering/hawk-release
   ref:
     branch: master
   secretRef:

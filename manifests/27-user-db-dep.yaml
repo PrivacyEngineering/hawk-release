@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: user-db
-        image: europe-west3-docker.pkg.dev/cnpe-blue/sockshop/user-db:latest
+        image: europe-west3-docker.pkg.dev/toucan-378111/toucan/user-db:latest
 
         ports:
         - name: mongo

@@ -74,3 +74,15 @@ variable "node_count" {
   type        = number
   default = 1
 }
+
+variable "repository_ssh_url" {
+  description = "hawk-release GitHub repository ssh url"
+  type = string
+  default = "git@github.com:PrivacyEngineering/hawk-release.git"
+}
+
+#variable "private_key_pem" {
+#  description = "GitHub repository token"
+#  type = string
+#  default = ""
+#}

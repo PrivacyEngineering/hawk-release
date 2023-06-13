@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: user
-        image: europe-west3-docker.pkg.dev/cnpe-blue/sockshop/user:latest
+        image: europe-west3-docker.pkg.dev/toucan-378111/toucan/user:latest
         resources:
           limits:
             cpu: 300m

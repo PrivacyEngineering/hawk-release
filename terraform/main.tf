@@ -20,6 +20,19 @@ provider "google-beta" {
   zone        = var.zone
 }
 
+provider "flux" {
+  kubernetes = {
+    config_path = "~/.kube/config"
+  }
+  git = {
+    url  = var.repository_ssh_url
+    ssh = {
+      username    = "git"
+      private_key = var.private_key_pem
+    }
+  }
+}
+
 module "enable_google_apis" {
   source  = "terraform-google-modules/project-factory/google//modules/project_services"
   version = "~> 14.0"

@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: catalogue-db
-        image: europe-west3-docker.pkg.dev/cnpe-blue/sockshop/catalogue-db:latest
+        image: europe-west3-docker.pkg.dev/toucan-378111/toucan/catalogue-db:latest
         resources:
           requests:
             cpu: 100m

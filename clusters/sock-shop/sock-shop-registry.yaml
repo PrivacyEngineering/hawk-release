@@ -6,7 +6,7 @@ metadata:
 spec:
   secretRef:
     name: gcr-json-key
-  image: europe-west3-docker.pkg.dev/cnpe-blue/sockshop/front-end
+  image: europe-west3-docker.pkg.dev/toucan-378111/toucan/front-end
   interval: 12h0m0s
 ---
 apiVersion: image.toolkit.fluxcd.io/v1beta1

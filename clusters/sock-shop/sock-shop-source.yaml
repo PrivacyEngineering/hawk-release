@@ -8,5 +8,5 @@ spec:
   interval: 1m0s
   ref:
     branch: master
-  url: https://github.com/TUB-CNPE-TB/kubernetes-deployment
+  url: https://github.com/PrivacyEngineering/hawk-release
 
