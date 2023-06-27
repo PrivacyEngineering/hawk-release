@@ -1,7 +1,0 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - hawk-kustomization.yaml
-  - istio-kustomization.yaml
-  - sock-shop-kustomization.yaml
-  - sock-shop-source.yaml
