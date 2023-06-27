@@ -1,6 +1,8 @@
 # GCP Setup with Terraform
 
-To simplify the setup of the infrastructure in the GCP, we provide Terraform files.
+To simplify the setup of the infrastructure in the GCP, we provide Terraform files. This configuration will not apply the image 
+automation configuration of Flux.
+
 ## Prerequirements
 •	The Terraform cli needs to be installed (https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 
