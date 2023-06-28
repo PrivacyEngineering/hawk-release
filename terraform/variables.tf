@@ -84,24 +84,11 @@ variable "repository_ssh_url" {
 variable "github_org" {
   description = "GitHub organization name"
   type = string
-  default = "Siar-Akbayin"
+  default = "PrivacyEngineering"
 }
 
 variable "github_repository" {
   description = "GitHub repository name"
   type = string
-  default = "kubernetes-deployment"
+  default = "hawk-release"
 }
-
-variable "github_token" {
-  sensitive = true
-  type      = string
-  default = "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"
-}
-
-
-#variable "private_key_pem" {
-#  description = "GitHub repository token"
-#  type = string
-#  default = ""
-#}

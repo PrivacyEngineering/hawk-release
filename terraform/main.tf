@@ -104,6 +104,24 @@ resource "null_resource" "install_istio" {
   ]
 }
 
+resource "null_resource" "apply_flagger" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "helm repo add flagger https://flagger.app"
+  }
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "kubectl apply -f https://raw.githubusercontent.com/fluxcd/flagger/main/artifacts/flagger/crd.yaml"
+  }
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "helm upgrade -i flagger flagger/flagger --namespace=istio-system --set crd.create=false --set meshProvider=istio --set metricsServer=http://prometheus:9090"
+  }
+  depends_on = [
+    module.gcloud, null_resource.install_istio
+  ]
+}
+
 resource "null_resource" "create_hawk_namespace" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
@@ -125,7 +143,7 @@ resource "flux_bootstrap_git" "this" {
 resource "null_resource" "apply_flux_resources" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command = "kubectl apply -k ../clusters/sock-shop/"
+    command = "kubectl apply -k ../clusters/"
   }
   depends_on = [
     github_repository_deploy_key.this, google_container_cluster.sock-shop, module.gcloud, flux_bootstrap_git.this
@@ -144,23 +162,6 @@ resource "null_resource" "apply_flux_resources" {
 #  ]
 #}
 #
-#resource "null_resource" "apply_flagger" {
-#  provisioner "local-exec" {
-#    interpreter = ["bash", "-exc"]
-#    command = "helm repo add flagger https://flagger.app"
-#  }
-#  provisioner "local-exec" {
-#    interpreter = ["bash", "-exc"]
-#    command = "kubectl apply -f https://raw.githubusercontent.com/fluxcd/flagger/main/artifacts/flagger/crd.yaml"
-#  }
-#  provisioner "local-exec" {
-#    interpreter = ["bash", "-exc"]
-#    command = "helm upgrade -i flagger flagger/flagger --namespace=istio-system --set crd.create=false --set meshProvider=istio --set metricsServer=http://prometheus:9090"
-#  }
-#  depends_on = [
-#    module.gcloud, null_resource.apply_istio
-#  ]
-#}
 #
 #resource "null_resource" "apply_deployment" {
 #  provisioner "local-exec" {
