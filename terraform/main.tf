@@ -32,7 +32,7 @@ provider "flux" {
     config_path = "~/.kube/config"
   }
   git = {
-    url = "https://github.com/Siar-Akbayin/kubernetes-deployment"
+    url = "https://github.com/PrivacyEngineering/hawk-release"
     http = {
       username = var.github_org
       password = var.github_token

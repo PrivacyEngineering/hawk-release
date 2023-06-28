@@ -2,7 +2,7 @@
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: GitRepository
 metadata:
-  name: kubernetes-deployment
+  name: sock-shop
   namespace: flux-system
 spec:
   interval: 1m0s

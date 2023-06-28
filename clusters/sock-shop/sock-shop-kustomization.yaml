@@ -10,7 +10,7 @@ spec:
 #      namespace: flux-system
   sourceRef:
     kind: GitRepository
-    name: kubernetes-deployment
+    name: sock-shop
   path: ./apps
   prune: true
   validation: client
