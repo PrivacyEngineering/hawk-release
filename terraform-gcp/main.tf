@@ -27,25 +27,25 @@ provider "google-beta" {
   zone        = var.zone
 }
 
-provider "flux" {
-  kubernetes = {
-    config_path = "~/.kube/config"
-  }
-  git = {
-    url = "https://github.com/PrivacyEngineering/hawk-release"
-    http = {
-      username = var.github_org
-      password = var.github_token
-    }
-    branch = "master"
-#    url  = "ssh://git@github.com/${var.github_org}/${var.github_repository}.git"
-##    url  = var.repository_ssh_url
-#    ssh = {
-#      username    = "git"
-#      private_key = tls_private_key.flux.private_key_pem
+#provider "flux" {
+#  kubernetes = {
+#    config_path = "~/.kube/config"
+#  }
+#  git = {
+#    url = "https://github.com/PrivacyEngineering/hawk-release"
+#    http = {
+#      username = var.github_org
+#      password = var.github_token
 #    }
-  }
-}
+#    branch = "master"
+##    url  = "ssh://git@github.com/${var.github_org}/${var.github_repository}.git"
+###    url  = var.repository_ssh_url
+##    ssh = {
+##      username    = "git"
+##      private_key = tls_private_key.flux.private_key_pem
+##    }
+#  }
+#}
 
 module "enable_google_apis" {
   source  = "terraform-google-modules/project-factory/google//modules/project_services"
@@ -132,21 +132,43 @@ resource "null_resource" "create_hawk_namespace" {
   ]
 }
 
-resource "flux_bootstrap_git" "this" {
-  path = "clusters"
-  components_extra = ["image-automation-controller", "image-reflector-controller"]
+resource "null_resource" "install_flux" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "flux install --components-extra image-reflector-controller,image-automation-controller"
+  }
   depends_on = [
-    github_repository_deploy_key.this, google_container_cluster.sock-shop, module.gcloud
+    module.gcloud, google_container_cluster.sock-shop
   ]
 }
 
-resource "null_resource" "apply_flux_resources" {
+#resource "flux_bootstrap_git" "this" {
+#  path = "clusters"
+#  components_extra = ["image-automation-controller", "image-reflector-controller"]
+#  depends_on = [
+#    github_repository_deploy_key.this, google_container_cluster.sock-shop, module.gcloud
+#  ]
+#}
+
+resource "null_resource" "apply_flux_resources_1" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "kubectl apply -k ../clusters/flux-system/"
+  }
+  depends_on = [
+#    github_repository_deploy_key.this,
+    google_container_cluster.sock-shop, module.gcloud, null_resource.install_flux
+  ]
+}
+
+resource "null_resource" "apply_flux_resources_2" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
     command = "kubectl apply -k ../clusters/"
   }
   depends_on = [
-    github_repository_deploy_key.this, google_container_cluster.sock-shop, module.gcloud, flux_bootstrap_git.this
+#    github_repository_deploy_key.this,
+    google_container_cluster.sock-shop, module.gcloud, null_resource.install_flux, null_resource.apply_flux_resources_1
   ]
 }
 
