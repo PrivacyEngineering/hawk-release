@@ -92,3 +92,9 @@ variable "github_repository" {
   type = string
   default = "hawk-release"
 }
+
+variable "github_token" {
+  description = "GitHub token"
+  type = string
+  default = "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"
+}
