@@ -17,6 +17,7 @@ spec:
   template:
     metadata:
       labels:
+    geo-EU: "true"
         name: catalogue
         app: catalogue
         version: v1

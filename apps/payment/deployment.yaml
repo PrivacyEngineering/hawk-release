@@ -16,6 +16,7 @@ spec:
   template:
     metadata:
       labels:
+    geo-EU: "true"
         name: payment
         app: payment
         version: v1
