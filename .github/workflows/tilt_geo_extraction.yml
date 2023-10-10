@@ -38,7 +38,7 @@ jobs:
                 # ALSO: This assumes that the labels are the first entry under metadata. If the labels are under some other section or not the first entry, this will not work. 
 
                 # Update the three deployment.yaml files
-                for FILE in apps/catalogue/deployment.yaml apps/orders/deployment.yaml apps/payment/deployment.yaml; do
+                for FILE in apps/catalogue/deployment.yaml apps/orders/deployment.yaml apps/payment/deployment.yaml apps/shipping/deployment.yaml; do
                   awk -v label="$LABEL" 'BEGIN {append=0} /metadata:/ {print; getline; if ($1 == "labels:" && append == 0) {print; print "    " label; append=1; next}}1' $FILE > ${FILE}_temp && mv ${FILE}_temp $FILE
                 done
             done
