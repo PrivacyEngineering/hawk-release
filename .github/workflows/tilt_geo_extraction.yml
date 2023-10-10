@@ -53,6 +53,7 @@ jobs:
         git add apps/catalogue/deployment.yaml
         git add apps/orders/deployment.yaml
         git add apps/payment/deployment.yaml
+        git add apps/shipping/deployment.yaml
   
         # Commit and push if there are any changes
         git diff-index --quiet HEAD || git commit -m "Update deployment.yaml files with geo label from tilt.json"
