@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: shipping
   labels:
     name: shipping
     app: shipping
     version: v1
+  name: shipping
   namespace: sock-shop
 spec:
   selector:

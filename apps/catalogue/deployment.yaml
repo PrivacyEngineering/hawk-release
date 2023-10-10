@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: catalogue
   labels:
     name: catalogue
     app: catalogue
     version: v1
+  name: catalogue
   namespace: sock-shop
 spec:
   replicas: 1

@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: payment
   labels:
     name: payment
     app: payment
     version: v1
+  name: payment
   namespace: sock-shop
 spec:
   selector:
