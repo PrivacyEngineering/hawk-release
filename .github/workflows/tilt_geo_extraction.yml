@@ -37,10 +37,10 @@ jobs:
                 # IMPORTANT: This assumes that the labels are indented with 4 spaces. If the indentation is different, this will not work.
                 # ALSO: This assumes that the labels are the first entry under metadata. If the labels are under some other section or not the first entry, this will not work. 
 
-                awk -v label="$LABEL" 'BEGIN {append=0} /metadata:/ {print; getline; if ($1 == "labels:" && append == 0) {print; print "    " label; append=1; next}}1' apps/catalogue/deployment.yaml > apps/catalogue/deployment_temp.yaml && mv apps/catalogue/deployment_temp.yaml apps/catalogue/deployment.yaml
-                awk -v label="$LABEL" 'BEGIN {append=0} /metadata:/ {print; getline; if ($1 == "labels:" && append == 0) {print; print "    " label; append=1; next}}1' apps/orders/deployment.yaml > apps/orders/deployment_temp.yaml && mv apps/orders/deployment_temp.yaml apps/orders/deployment.yaml
-                awk -v label="$LABEL" 'BEGIN {append=0} /metadata:/ {print; getline; if ($1 == "labels:" && append == 0) {print; print "    " label; append=1; next}}1' apps/payment/deployment.yaml > apps/payment/deployment_temp.yaml && mv apps/payment/deployment_temp.yaml apps/payment/deployment.yaml
-
+                # Update the three deployment.yaml files
+                for FILE in apps/catalogue/deployment.yaml apps/orders/deployment.yaml apps/payment/deployment.yaml; do
+                  awk -v label="$LABEL" 'BEGIN {append=0} /metadata:/ {print; getline; if ($1 == "labels:" && append == 0) {print; print "    " label; append=1; next}}1' $FILE > ${FILE}_temp && mv ${FILE}_temp $FILE
+                done
             done
         fi
 
@@ -48,6 +48,12 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add dev/deployment.yaml
-        git diff-index --quiet HEAD || git commit -m "Update deployment.yaml with geo label from tilt.json"
+      
+        # Add all three potentially modified deployment.yaml files
+        git add apps/catalogue/deployment.yaml
+        git add apps/orders/deployment.yaml
+        git add apps/payment/deployment.yaml
+  
+        # Commit and push if there are any changes
+        git diff-index --quiet HEAD || git commit -m "Update deployment.yaml files with geo label from tilt.json"
         git push
