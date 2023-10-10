@@ -14,7 +14,6 @@ spec:
   template:
     metadata:
       labels:
-    geo-EU: "true"
         name: orders
         app: orders
       annotations:
