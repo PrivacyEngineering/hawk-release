@@ -1,0 +1,53 @@
+name: Tilt Geo Extraction
+
+on:
+  push:
+    paths:
+      - 'tilt.json'
+      
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  update-deployment:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+
+    - name: Set up JQ
+      run: sudo apt-get install jq
+
+    - name: Extract country and update deployment.yaml
+      run: |
+        # Extract country from tilt.json
+        COUNTRIES=$(jq -r '.dataDisclosed[]?.recipients[]?.country | select(.!=null)' tilt.json)
+        
+        # Print the extracted countries
+        echo "Extracted Countries: $COUNTRIES"
+        
+        # Check if there are any countries extracted
+        if [ -n "$COUNTRIES" ]; then
+            # Update deployment.yaml for each country
+            for COUNTRY in $COUNTRIES; do
+                LABEL="geo-$COUNTRY: \"true\""
+
+                # Check and append the label with correct indentation under metadata/labels. Only does this at the first instance of labels and not for subsequent instances. 
+                # IMPORTANT: This assumes that the labels are indented with 4 spaces. If the indentation is different, this will not work.
+                # ALSO: This assumes that the labels are the first entry under metadata. If the labels are under some other section or not the first entry, this will not work. 
+
+                awk -v label="$LABEL" 'BEGIN {append=0} /metadata:/ {print; getline; if ($1 == "labels:" && append == 0) {print; print "    " label; append=1; next}}1' apps/catalogue/deployment.yaml > apps/catalogue/deployment_temp.yaml && mv apps/catalogue/deployment_temp.yaml apps/catalogue/deployment.yaml
+                awk -v label="$LABEL" 'BEGIN {append=0} /metadata:/ {print; getline; if ($1 == "labels:" && append == 0) {print; print "    " label; append=1; next}}1' apps/orders/deployment.yaml > apps/orders/deployment_temp.yaml && mv apps/orders/deployment_temp.yaml apps/orders/deployment.yaml
+                awk -v label="$LABEL" 'BEGIN {append=0} /metadata:/ {print; getline; if ($1 == "labels:" && append == 0) {print; print "    " label; append=1; next}}1' apps/payment/deployment.yaml > apps/payment/deployment_temp.yaml && mv apps/payment/deployment_temp.yaml apps/payment/deployment.yaml
+
+            done
+        fi
+
+    - name: Commit and push if changed
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add dev/deployment.yaml
+        git diff-index --quiet HEAD || git commit -m "Update deployment.yaml with geo label from tilt.json"
+        git push
