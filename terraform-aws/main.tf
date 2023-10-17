@@ -221,9 +221,46 @@ resource "null_resource" "apply_deployment" {
     command = "kubectl apply -k ../apps -n sock-shop"
   }
   depends_on = [
-    module.eks, null_resource.install_istio, null_resource.apply_flagger, null_resource.install_flux, null_resource.fetch_aws_endpoint
+    module.eks, null_resource.install_istio, null_resource.apply_flagger, null_resource.install_flux,
+    null_resource.fetch_aws_endpoint
   ]
 }
+
+resource "null_resource" "install_opa_gatekeeper" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts && helm install gatekeeper/gatekeeper --name-template=gatekeeper --namespace gatekeeper-system --create-namespace"
+  }
+  depends_on = [
+    module.eks, null_resource.install_istio, null_resource.apply_flagger, null_resource.install_flux,
+    null_resource.fetch_aws_endpoint, null_resource.apply_deployment
+  ]
+}
+
+resource "null_resource" "apply_opa_templates" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "kubectl apply -f ../gatekeeper-policies/templates/."
+  }
+  depends_on = [
+    module.eks, null_resource.install_istio, null_resource.apply_flagger, null_resource.install_flux,
+    null_resource.fetch_aws_endpoint, null_resource.apply_deployment, null_resource.install_opa_gatekeeper
+  ]
+}
+
+resource "null_resource" "apply_opa_constraints" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "kubectl apply -f ../gatekeeper-policies/constraints/."
+  }
+  depends_on = [
+    module.eks, null_resource.install_istio, null_resource.apply_flagger, null_resource.install_flux,
+    null_resource.fetch_aws_endpoint, null_resource.apply_deployment, null_resource.install_opa_gatekeeper,
+    null_resource.apply_opa_templates
+  ]
+}
+
+
 #
 #resource "null_resource" "wait_conditions" {
 #  provisioner "local-exec" {
