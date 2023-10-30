@@ -50,7 +50,7 @@ jobs:
         CATEGORIES=$(jq -r '.dataDisclosed[]?.recipients[]?.category | select(.!=null)' tilt.json)
         
         # Print the extracted categories
-        echo "Extracted Countries: $CATEGORIES"
+        echo "Extracted Categories: $CATEGORIES"
         
         # Check if there are any categories extracted
         if [ -n "$CATEGORIES" ]; then
