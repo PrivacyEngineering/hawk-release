@@ -37,7 +37,7 @@ jobs:
                 # IMPORTANT: This assumes that the labels are indented with 4 spaces. If the indentation is different, this will not work.
                 # ALSO: This assumes that the labels are the first entry under metadata. If the labels are under some other section or not the first entry, this will not work. 
 
-                # Update the three deployment.yaml files
+                # Update the deployment.yaml files
                 for FILE in apps/catalogue/deployment.yaml apps/orders/deployment.yaml apps/payment/deployment.yaml apps/shipping/deployment.yaml; do
                   awk -v label="$LABEL" 'BEGIN {append=0} /metadata:/ {print; getline; if ($1 == "labels:" && append == 0) {print; print "    " label; append=1; next}}1' $FILE > ${FILE}_temp && mv ${FILE}_temp $FILE
                 done
@@ -60,7 +60,11 @@ jobs:
                 # Check and append the label with correct indentation under metadata/labels. Only does this at the first instance of labels and not for subsequent instances. 
                 # IMPORTANT: This assumes that the labels are indented with 4 spaces. If the indentation is different, this will not work.
                 # ALSO: This assumes that the labels are the first entry under metadata. If the labels are under some other section or not the first entry, this will not work. 
-                awk -v label="$LABEL" 'BEGIN {append=0} /metadata:/ {print; getline; if ($1 == "labels:" && append == 0) {print; print "    " label; append=1; next}}1' dev/deployment.yaml > dev/deployment_temp.yaml && mv dev/deployment_temp.yaml dev/deployment.yaml
+
+                # Update the deployment.yaml files
+                for FILE in apps/catalogue/deployment.yaml apps/orders/deployment.yaml apps/payment/deployment.yaml apps/shipping/deployment.yaml; do
+                  awk -v label="$LABEL" 'BEGIN {append=0} /metadata:/ {print; getline; if ($1 == "labels:" && append == 0) {print; print "    " label; append=1; next}}1' $FILE > ${FILE}_temp && mv ${FILE}_temp $FILE
+                done
             done
         fi
 
