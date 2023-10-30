@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
+    cat-DB: "true"
+    geo-DE: "true"
     name: catalogue
     app: catalogue
     version: v1
