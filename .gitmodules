@@ -1,3 +1,6 @@
 [submodule "hawk"]
 	path = hawk
 	url = https://github.com/PrivacyEngineering/hawk
+[submodule "hawk-service"]
+	path = hawk-service
+	url = https://github.com/PrivacyEngineering/hawk-service
