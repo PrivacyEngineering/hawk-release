@@ -2,8 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    cat-DB: "true"
-    geo-DE: "true"
     name: payment
     app: payment
     version: v1

@@ -2,8 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    cat-DB: "true"
-    geo-DE: "true"
     name: shipping
     app: shipping
     version: v1
