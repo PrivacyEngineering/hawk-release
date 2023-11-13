@@ -13,7 +13,7 @@ spec:
         package k8sdenynodus
 
         violation[{"msg": msg}] {
-          input.review.object.metadata.labels["cat"] == "DB"
+          input.review.object.metadata.labels["serviceType"] == "DB"
           input.review.object.metadata.labels["geo"] == "US"
-          msg := "Deployments with cat:DB and geo:US labels are not allowed"
+          msg := "Deployments with serviceType:DB and geo:US labels are not allowed"
         }

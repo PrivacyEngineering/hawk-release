@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    cat: DB
+    serviceType: DB
     geo: FR
     name: catalogue
     app: catalogue
@@ -26,40 +26,40 @@ spec:
         sidecar.istio.io/extraStatTags: gcp_location,http_method
     spec:
       containers:
-      - name: catalogue
-        image: europe-west3-docker.pkg.dev/toucan-378111/toucan/catalogue:latest
-        command: ["/app"]
-        args:
-        - -port=8080
-        resources:
-          limits:
-            cpu: 200m
-            memory: 200Mi
-          requests:
-            cpu: 100m
-            memory: 100Mi
-        ports:
-        - containerPort: 8080
-        securityContext:
-          runAsNonRoot: true
-          runAsUser: 10001
-          capabilities:
-            drop:
-              - all
-            add:
-              - NET_BIND_SERVICE
-          readOnlyRootFilesystem: true
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8080
-          initialDelaySeconds: 300
-          periodSeconds: 3
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 8080
-          initialDelaySeconds: 180
-          periodSeconds: 3
+        - name: catalogue
+          image: europe-west3-docker.pkg.dev/toucan-378111/toucan/catalogue:latest
+          command: ["/app"]
+          args:
+            - -port=8080
+          resources:
+            limits:
+              cpu: 200m
+              memory: 200Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          ports:
+            - containerPort: 8080
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            capabilities:
+              drop:
+                - all
+              add:
+                - NET_BIND_SERVICE
+            readOnlyRootFilesystem: true
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 300
+            periodSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 180
+            periodSeconds: 3
       nodeSelector:
         beta.kubernetes.io/os: linux

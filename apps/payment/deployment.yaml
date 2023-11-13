@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    cat: DB
+    serviceType: DB
     geo: FR
     name: payment
     app: payment
@@ -25,37 +25,37 @@ spec:
         sidecar.istio.io/extraStatTags: gcp_location,http_method
     spec:
       containers:
-      - name: payment
-        image: europe-west3-docker.pkg.dev/toucan-378111/toucan/payment:latest
-        resources:
-          limits:
-            cpu: 200m
-            memory: 200Mi
-          requests:
-            cpu: 99m
-            memory: 100Mi
-        ports:
-        - containerPort: 80
-        securityContext:
-          runAsNonRoot: true
-          runAsUser: 10001
-          capabilities:
-            drop:
-              - all
-            add:
-              - NET_BIND_SERVICE
-          readOnlyRootFilesystem: true
-#        livenessProbe:
-#          httpGet:
-#            path: /health
-#            port: 80
-#          initialDelaySeconds: 300
-#          periodSeconds: 3
-#        readinessProbe:
-#          httpGet:
-#            path: /health
-#            port: 80
-#          initialDelaySeconds: 180
-#          periodSeconds: 3
+        - name: payment
+          image: europe-west3-docker.pkg.dev/toucan-378111/toucan/payment:latest
+          resources:
+            limits:
+              cpu: 200m
+              memory: 200Mi
+            requests:
+              cpu: 99m
+              memory: 100Mi
+          ports:
+            - containerPort: 80
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            capabilities:
+              drop:
+                - all
+              add:
+                - NET_BIND_SERVICE
+            readOnlyRootFilesystem: true
+      #        livenessProbe:
+      #          httpGet:
+      #            path: /health
+      #            port: 80
+      #          initialDelaySeconds: 300
+      #          periodSeconds: 3
+      #        readinessProbe:
+      #          httpGet:
+      #            path: /health
+      #            port: 80
+      #          initialDelaySeconds: 180
+      #          periodSeconds: 3
       nodeSelector:
         beta.kubernetes.io/os: linux
