@@ -1,22 +1,22 @@
-apiVersion: image.toolkit.fluxcd.io/v1beta1
-kind: ImageRepository
-metadata:
-  name: frontend
-  namespace: flux-system
-spec:
-  secretRef:
-    name: gcr-json-key
-  image: europe-west3-docker.pkg.dev/toucan-378111/toucan/front-end
-  interval: 12h0m0s
----
-apiVersion: image.toolkit.fluxcd.io/v1beta1
-kind: ImagePolicy
-metadata:
-  name: frontend
-  namespace: flux-system
-spec:
-  imageRepositoryRef:
-    name: frontend
-  policy:
-    semver:
-      range: ">=1.0.0 <2.0.0"
+#apiVersion: image.toolkit.fluxcd.io/v1beta1
+#kind: ImageRepository
+#metadata:
+#  name: frontend
+#  namespace: flux-system
+#spec:
+#  secretRef:
+#    name: gcr-json-key
+#  image: europe-west3-docker.pkg.dev/toucan-378111/toucan/front-end
+#  interval: 12h0m0s
+#---
+#apiVersion: image.toolkit.fluxcd.io/v1beta1
+#kind: ImagePolicy
+#metadata:
+#  name: frontend
+#  namespace: flux-system
+#spec:
+#  imageRepositoryRef:
+#    name: frontend
+#  policy:
+#    semver:
+#      range: ">=1.0.0 <2.0.0"

@@ -54,38 +54,38 @@ spec:
         ) by (le)
     )
 ---
-apiVersion: flagger.app/v1beta1
-kind: MetricTemplate
-metadata:
-  name: gcp_location_not_europe
-  namespace: istio-system
-spec:
-  provider:
-    type: prometheus
-    address: http://prometheus.istio-system:9090
-  query: |
-    sum(istio_gcp_location_not_europe)
----
-apiVersion: flagger.app/v1beta1
-kind: MetricTemplate
-metadata:
-  name: destination-country-not-eu
-  namespace: istio-system
-spec:
-  provider:
-    type: prometheus
-    address: http://prometheus.istio-system:9090
-  query: |
-    sum(istio_destination_country_not_eu)
----
-apiVersion: flagger.app/v1beta1
-kind: MetricTemplate
-metadata:
-  name: hawk-unmapped-fields-ratio-front-end
-  namespace: hawk-ns
-spec:
-  provider:
-    type: prometheus
-    address: http://prometheus.istio-system:9090
-  query: |
-    hawk.front-end.unmapped.ratio
+#apiVersion: flagger.app/v1beta1
+#kind: MetricTemplate
+#metadata:
+#  name: gcp_location_not_europe
+#  namespace: istio-system
+#spec:
+#  provider:
+#    type: prometheus
+#    address: http://prometheus.istio-system:9090
+#  query: |
+#    sum(istio_gcp_location_not_europe)
+#---
+#apiVersion: flagger.app/v1beta1
+#kind: MetricTemplate
+#metadata:
+#  name: destination-country-not-eu
+#  namespace: istio-system
+#spec:
+#  provider:
+#    type: prometheus
+#    address: http://prometheus.istio-system:9090
+#  query: |
+#    sum(istio_destination_country_not_eu)
+#---
+#apiVersion: flagger.app/v1beta1
+#kind: MetricTemplate
+#metadata:
+#  name: hawk-unmapped-fields-ratio-front-end
+#  namespace: hawk-ns
+#spec:
+#  provider:
+#    type: prometheus
+#    address: http://prometheus.istio-system:9090
+#  query: |
+#    hawk.front-end.unmapped.ratio
