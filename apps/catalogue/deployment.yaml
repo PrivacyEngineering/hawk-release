@@ -27,8 +27,7 @@ spec:
     spec:
       containers:
       - name: catalogue
-        image: weaveworksdemos/catalogue:0.3.5
-#        image: europe-west3-docker.pkg.dev/toucan-378111/toucan/catalogue:latest
+        image: europe-west3-docker.pkg.dev/toucan-378111/toucan/catalogue:latest
         command: ["/app"]
         args:
         - -port=8080

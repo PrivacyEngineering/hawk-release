@@ -1,0 +1,19 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: nodbusdeployments
+spec:
+  crd:
+    spec:
+      names:
+        kind: NoDbUsDeployments
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sdenynodus
+
+        violation[{"msg": msg}] {
+          input.review.object.metadata.labels["serviceType"] == "DB"
+          input.review.object.metadata.labels["geo"] == "US"
+          msg := "Deployments with serviceType:DB and geo:US labels are not allowed"
+        }
