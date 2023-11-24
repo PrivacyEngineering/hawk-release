@@ -6,6 +6,7 @@ metadata:
   labels:
     app: frontend
 spec:
+  replicas: 1
   progressDeadlineSeconds: 180
   strategy:
     rollingUpdate:

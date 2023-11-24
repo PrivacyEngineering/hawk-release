@@ -85,14 +85,31 @@ provider "aws" {
 #    aws_eks_cluster.example
 #  ]
 #}
+resource "aws_security_group" "my-security-group" {
+  name        = "my-security-group"
+  description = "Allow inbound all TCP traffic and outbound all traffic"
 
+  ingress {
+    from_port = 0
+    to_port   = 65535
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port = 0
+    to_port   = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "19.15.3"
 
   cluster_name    = "hawk-release"
-  cluster_version = "1.27"
+  cluster_version = "1.28"
 
   subnet_ids      = ["subnet-0cf8af7fb83e9214c", "subnet-099b18565de436a67", "subnet-002f1b128ecb07d50"]
   cluster_endpoint_public_access = true
@@ -107,10 +124,11 @@ module "eks" {
       name = "default"
 
       instance_types = ["t3.large"]
+      min_size     = 1
+      max_size     = 8
+      desired_size = 2
 
-      min_size     = 2
-      max_size     = 4
-      desired_size = 3
+      vpc_security_group_ids = [aws_security_group.my-security-group.id]
     }
   }
 }
@@ -128,14 +146,29 @@ resource "null_resource" "fetch_aws_endpoint" {
 resource "null_resource" "install_istio" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command = "istioctl install -y"
+    command = "istioctl install -f ../istio/metrics/IstioOperator.yaml -y"
+  }
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "kubectl apply -k ../istio/ "
   }
   depends_on = [
     module.eks, null_resource.fetch_aws_endpoint
   ]
 }
 
-resource "null_resource" "apply_flagger" {
+resource "null_resource" "apply_sock-shop_ns" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "kubectl apply -f ../apps/namespace.yaml"
+  }
+  depends_on = [
+    module.eks, null_resource.fetch_aws_endpoint, null_resource.install_istio
+  ]
+}
+
+
+resource "null_resource" "install_flagger" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
     command = "helm repo add flagger https://flagger.app"
@@ -148,69 +181,71 @@ resource "null_resource" "apply_flagger" {
     interpreter = ["bash", "-exc"]
     command = "helm upgrade -i flagger flagger/flagger --namespace=istio-system --set crd.create=false --set meshProvider=istio --set metricsServer=http://prometheus:9090"
   }
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "kubectl apply -k ../flagger/"
+  }
   depends_on = [
     null_resource.install_istio, module.eks, null_resource.fetch_aws_endpoint
   ]
 }
 
-resource "null_resource" "create_hawk_namespace" {
+resource "null_resource" "apply_prometheus_and_kiali" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command = "kubectl create namespace hawk-ns"
+    command = "kubectl apply -k ../flagger/ && kubectl apply -k ../flagger/metrics/"
   }
   depends_on = [
-    module.eks, null_resource.fetch_aws_endpoint, null_resource.install_istio
-  ]
-}
-resource "null_resource" "install_flux" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-exc"]
-    command = "flux install --components-extra image-reflector-controller,image-automation-controller"
-  }
-  depends_on = [
-    module.eks, null_resource.fetch_aws_endpoint, null_resource.install_istio
+    module.eks, null_resource.fetch_aws_endpoint, null_resource.install_istio, null_resource.install_flagger
   ]
 }
 
-#resource "flux_bootstrap_git" "this" {
-#  path = "clusters"
-#  components_extra = ["image-automation-controller", "image-reflector-controller"]
-#  depends_on = [
-#    github_repository_deploy_key.this
-#  ]
-#}
-
-resource "null_resource" "apply_flux_resources_1" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-exc"]
-    command = "kubectl apply -k ../clusters/flux-system/"
-  }
-  depends_on = [
-#    github_repository_deploy_key.this,
-    null_resource.install_flux, module.eks, null_resource.fetch_aws_endpoint
-  ]
-}
-
-resource "null_resource" "apply_flux_resources_2" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-exc"]
-    command = "kubectl apply -k ../clusters/"
-  }
-  depends_on = [
-#    github_repository_deploy_key.this,
-    null_resource.install_flux, module.eks, null_resource.fetch_aws_endpoint
-  ]
-}
-
-
-#
-#resource "null_resource" "apply_istio" {
+#resource "null_resource" "create_hawk_namespace" {
 #  provisioner "local-exec" {
 #    interpreter = ["bash", "-exc"]
-#    command = "kubectl apply -k ${var.filepath_istio} -n istio-system"
+#    command = "kubectl create namespace hawk-ns"
 #  }
 #  depends_on = [
-#    module.gcloud, null_resource.install_istio
+#    module.eks, null_resource.fetch_aws_endpoint, null_resource.install_istio
+#  ]
+#}
+#resource "null_resource" "install_flux" {
+#  provisioner "local-exec" {
+#    interpreter = ["bash", "-exc"]
+#    command = "flux install --components-extra image-reflector-controller,image-automation-controller"
+#  }
+#  depends_on = [
+#    module.eks, null_resource.fetch_aws_endpoint, null_resource.install_istio
+#  ]
+#}
+#
+##resource "flux_bootstrap_git" "this" {
+##  path = "clusters"
+##  components_extra = ["image-automation-controller", "image-reflector-controller"]
+##  depends_on = [
+##    github_repository_deploy_key.this
+##  ]
+##}
+#
+#resource "null_resource" "apply_flux_resources_1" {
+#  provisioner "local-exec" {
+#    interpreter = ["bash", "-exc"]
+#    command = "kubectl apply -k ../clusters/flux-system/"
+#  }
+#  depends_on = [
+##    github_repository_deploy_key.this,
+#    null_resource.install_flux, module.eks, null_resource.fetch_aws_endpoint
+#  ]
+#}
+#
+#resource "null_resource" "apply_flux_resources_2" {
+#  provisioner "local-exec" {
+#    interpreter = ["bash", "-exc"]
+#    command = "kubectl apply -k ../clusters/"
+#  }
+#  depends_on = [
+##    github_repository_deploy_key.this,
+#    null_resource.install_flux, module.eks, null_resource.fetch_aws_endpoint
 #  ]
 #}
 #
@@ -218,58 +253,58 @@ resource "null_resource" "apply_flux_resources_2" {
 resource "null_resource" "apply_deployment" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command = "kubectl apply -k ../apps -n sock-shop"
+    command = "kubectl apply -f ../apps/namespace.yaml"
   }
   depends_on = [
-    module.eks, null_resource.install_istio, null_resource.apply_flagger, null_resource.install_flux,
-    null_resource.fetch_aws_endpoint
+    module.eks, null_resource.install_istio, null_resource.fetch_aws_endpoint, null_resource.install_flagger, null_resource.apply_sock-shop_ns, null_resource.apply_prometheus_and_kiali
+#    null_resource.apply_flagger, null_resource.install_flux, null_resource.apply_flux_resources_2
   ]
 }
 
-resource "null_resource" "install_opa_gatekeeper" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-exc"]
-    command = "helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts && helm install gatekeeper/gatekeeper --name-template=gatekeeper --namespace gatekeeper-system --create-namespace"
-  }
-  depends_on = [
-    module.eks, null_resource.install_istio, null_resource.apply_flagger, null_resource.install_flux,
-    null_resource.fetch_aws_endpoint, null_resource.apply_deployment
-  ]
-}
-
-resource "null_resource" "apply_opa_templates" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-exc"]
-    command = "kubectl apply -f ../gatekeeper-policies/templates/."
-  }
-  depends_on = [
-    module.eks, null_resource.install_istio, null_resource.apply_flagger, null_resource.install_flux,
-    null_resource.fetch_aws_endpoint, null_resource.apply_deployment, null_resource.install_opa_gatekeeper
-  ]
-}
-
-resource "null_resource" "apply_opa_constraints" {
-  provisioner "local-exec" {
-    interpreter = ["bash", "-exc"]
-    command = "kubectl apply -f ../gatekeeper-policies/constraints/."
-  }
-  depends_on = [
-    module.eks, null_resource.install_istio, null_resource.apply_flagger, null_resource.install_flux,
-    null_resource.fetch_aws_endpoint, null_resource.apply_deployment, null_resource.install_opa_gatekeeper,
-    null_resource.apply_opa_templates
-  ]
-}
-
-
-#
-#resource "null_resource" "wait_conditions" {
+#resource "null_resource" "install_opa_gatekeeper" {
 #  provisioner "local-exec" {
 #    interpreter = ["bash", "-exc"]
-#    command = "kubectl wait --for=condition=ready pods --all -n sock-shop --timeout=-1s 2> /dev/null"
+#    command = "helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts && helm install gatekeeper/gatekeeper --name-template=gatekeeper --namespace gatekeeper-system --create-namespace"
 #  }
-#
 #  depends_on = [
-#    module.gcloud, null_resource.apply_deployment
+#    module.eks, null_resource.install_istio, null_resource.apply_flagger, null_resource.install_flux,
+#    null_resource.fetch_aws_endpoint, null_resource.apply_deployment
 #  ]
 #}
+#
+#resource "null_resource" "apply_opa_templates" {
+#  provisioner "local-exec" {
+#    interpreter = ["bash", "-exc"]
+#    command = "kubectl apply -f ../gatekeeper-policies/templates/complex-template.yaml"
+#  }
+#  depends_on = [
+#    module.eks, null_resource.install_istio, null_resource.apply_flagger, null_resource.install_flux,
+#    null_resource.fetch_aws_endpoint, null_resource.apply_deployment, null_resource.install_opa_gatekeeper
+#  ]
+#}
+#
+#resource "null_resource" "apply_opa_constraints" {
+#  provisioner "local-exec" {
+#    interpreter = ["bash", "-exc"]
+#    command = "kubectl apply -f ../gatekeeper-policies/constraints/complex-constraint.yaml"
+#  }
+#  depends_on = [
+#    module.eks, null_resource.install_istio, null_resource.apply_flagger, null_resource.install_flux,
+#    null_resource.fetch_aws_endpoint, null_resource.apply_deployment, null_resource.install_opa_gatekeeper,
+#    null_resource.apply_opa_templates
+#  ]
+#}
+#
+##resource "null_resource" "wait_conditions" {
+##  provisioner "local-exec" {
+##    interpreter = ["bash", "-exc"]
+##    command = "kubectl wait --for=condition=ready pods --all -n sock-shop --timeout=-1s 2> /dev/null"
+##  }
+##
+##  depends_on = [
+##    module.eks, null_resource.install_istio, null_resource.apply_flagger, null_resource.install_flux,
+##    null_resource.fetch_aws_endpoint, null_resource.apply_deployment, null_resource.install_opa_gatekeeper,
+##    null_resource.apply_opa_templates
+##  ]
+##}
 

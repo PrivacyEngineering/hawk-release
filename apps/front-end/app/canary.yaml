@@ -31,7 +31,7 @@ spec:
     trafficPolicy:
       tls:
         # use ISTIO_MUTUAL when mTLS is enabled
-        mode: ISTIO_MUTUAL
+        mode: DISABLE
   analysis:
     # schedule interval (default 60s)
     interval: 30s
@@ -53,13 +53,13 @@ spec:
 #          cookie:
 #            regex: "^(.*?;)?(type=insider)(;.*)?$"
     # Istio Prometheus checks
-    alerts:
-      - name: "on-call Discord"
-        severity: info
-        providerRef:
-          name: on-call
-          namespace: flux-system
-    metrics:
+#    alerts:
+#      - name: "on-call Discord"
+#        severity: info
+#        providerRef:
+#          name: on-call
+#          namespace: flux-system
+#    metrics:
 #      - name: request-success-rate
 #        interval: 1m
 #        thresholdRange:
@@ -68,41 +68,41 @@ spec:
 #        interval: 1m
 #        thresholdRange:
 #          max: 1000
-      - name: error-rate
-        templateRef:
-          name: error-rate
-          namespace: istio-system
-        thresholdRange:
-          max: 10
-        interval: 30s
-      - name: latency
-        templateRef:
-          name: latency
-          namespace: istio-system
-        thresholdRange:
-          max: 500
-        interval: 30s
-      - name: gcp_location_not_europe
-        templateRef:
-          name: gcp_location_not_europe
-          namespace: istio-system
-        thresholdRange:
-          max: 1
-        interval: 60s
-      - name: destination-country-not-eu
-        templateRef:
-          name: destination-country-not-eu
-          namespace: istio-system
-        thresholdRange:
-          max: 1
-        interval: 60s
-      - name: hawk-unmapped-fields-ratio-front-end
-        templateRef:
-          name: hawk-unmapped-fields-ratio-front-end
-          namespace: hawk-ns
-        thresholdRange:
-          max: 0.5
-        interval: 60s
+#      - name: error-rate
+#        templateRef:
+#          name: error-rate
+#          namespace: istio-system
+#        thresholdRange:
+#          max: 10
+#        interval: 30s
+#      - name: latency
+#        templateRef:
+#          name: latency
+#          namespace: istio-system
+#        thresholdRange:
+#          max: 500
+#        interval: 30s
+#      - name: gcp_location_not_europe
+#        templateRef:
+#          name: gcp_location_not_europe
+#          namespace: istio-system
+#        thresholdRange:
+#          max: 1
+#        interval: 60s
+#      - name: destination-country-not-eu
+#        templateRef:
+#          name: destination-country-not-eu
+#          namespace: istio-system
+#        thresholdRange:
+#          max: 1
+#        interval: 60s
+#      - name: hawk-unmapped-fields-ratio-front-end
+#        templateRef:
+#          name: hawk-unmapped-fields-ratio-front-end
+#          namespace: hawk-ns
+#        thresholdRange:
+#          max: 0.5
+#        interval: 60s
 #    webhooks:
 #      - name: conformance-test
 #        type: pre-rollout

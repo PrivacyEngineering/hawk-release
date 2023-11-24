@@ -23,7 +23,8 @@ spec:
     spec:
       containers:
       - name: orders
-        image: europe-west3-docker.pkg.dev/toucan-378111/toucan/orders:latest
+#        image: europe-west3-docker.pkg.dev/toucan-378111/toucan/orders:latest
+        image: weaveworksdemos/orders:0.4.7
         env:
          - name: JAVA_OPTS
            value: -Xms64m -Xmx128m -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom -Dspring.zipkin.enabled=false
