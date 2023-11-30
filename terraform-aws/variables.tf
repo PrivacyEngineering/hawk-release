@@ -84,11 +84,31 @@ variable "repository_ssh_url" {
 variable "github_org" {
   description = "GitHub organization name"
   type = string
-  default = "PrivacyEngineering"
 }
 
 variable "github_repository" {
   description = "GitHub repository name"
   type = string
-  default = "hawk-release"
+}
+
+variable "github_token" {
+  description = "GitHub token"
+  type = string
+}
+
+#variable "github_username" {
+#  description = "GitHub username"
+#  type = string
+#}
+
+variable "branch" {
+  type        = string
+  default     = "opa-gatekeeper"
+  description = "branch name"
+}
+
+variable "target_path" {
+  type        = string
+  default     = "clusters"
+  description = "flux sync target path"
 }
