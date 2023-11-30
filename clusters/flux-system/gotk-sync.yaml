@@ -11,7 +11,7 @@ spec:
     branch: opa-gatekeeper
   secretRef:
     name: flux-system
-  url: https://github.com/PrivacyEngineering/hawk-release
+  url: ssh://git@github.com/PrivacyEngineering/hawk-release.git
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
