@@ -27,7 +27,7 @@ spec:
       containers:
       - name: payment
 #        image: europe-west3-docker.pkg.dev/toucan-378111/toucan/payment:latest
-        image: weaveworksdemos/payment:0.4.3
+        image: ghcr.io/siar-akbayin/payment:0.4.3
         resources:
           limits:
             cpu: 200m
