@@ -78,44 +78,6 @@ provider "aws" {
 #  value = aws_eks_cluster.example.certificate_authority[0].data
 #}
 
-#resource "aws_eks_cluster" "example" {
-#  name     = "hawk-release"
-#  role_arn = "arn:aws:iam::471472241282:role/eksClusterRole"
-#
-#  vpc_config {
-#    subnet_ids = ["subnet-0cf8af7fb83e9214c", "subnet-099b18565de436a67", "subnet-002f1b128ecb07d50"]
-#  }
-#
-#  # Ensure that IAM Role permissions are created before and deleted after EKS Cluster handling.
-#  # Otherwise, EKS will not be able to properly delete EKS managed EC2 infrastructure such as Security Groups.
-#  #  depends_on = [
-#  #    aws_iam_role_policy_attachment.example-AmazonEKSClusterPolicy,
-#  #    aws_iam_role_policy_attachment.example-AmazonEKSVPCResourceController,
-#  #  ]
-#}
-#
-#resource "aws_eks_node_group" "example" {
-#  cluster_name    = aws_eks_cluster.example.name
-#  node_group_name = "default"
-#  node_role_arn   = "arn:aws:iam::471472241282:role/AmazonEKSNodeRole"
-#  subnet_ids      = ["subnet-0cf8af7fb83e9214c", "subnet-099b18565de436a67", "subnet-002f1b128ecb07d50"]
-#
-#  scaling_config {
-#    desired_size = 1
-#    max_size     = 2
-#    min_size     = 1
-#  }
-#
-#  update_config {
-#    max_unavailable = 1
-#  }
-#
-#  # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
-#  # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
-#  depends_on = [
-#    aws_eks_cluster.example
-#  ]
-#}
 resource "aws_security_group" "my-security-group" {
   name        = "my-security-group"
   description = "Allow inbound all TCP traffic and outbound all traffic"
@@ -164,7 +126,7 @@ module "eks" {
   }
 }
 
-resource "null_resource" "fetch_aws_endpoint" {
+resource "terraform_data" "fetch_aws_endpoint" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
     command = "aws eks update-kubeconfig --name hawk-release --region eu-central-1"
@@ -172,15 +134,15 @@ resource "null_resource" "fetch_aws_endpoint" {
   depends_on = [module.eks]
 }
 
-resource "null_resource" "apply_sock-shop_ns" {
+resource "terraform_data" "apply_sock-shop_ns" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
     command = "kubectl apply -f ../apps/namespace.yaml"
   }
-  depends_on = [null_resource.fetch_aws_endpoint]
+  depends_on = [terraform_data.fetch_aws_endpoint]
 }
 
-resource "null_resource" "install_istio" {
+resource "terraform_data" "install_istio" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
     command = "istioctl install -f ../istio/metrics/IstioOperator.yaml -y"
@@ -189,10 +151,10 @@ resource "null_resource" "install_istio" {
     interpreter = ["bash", "-exc"]
     command = "kubectl apply -k ../istio/ "
   }
-  depends_on = [null_resource.apply_sock-shop_ns]
+  depends_on = [terraform_data.apply_sock-shop_ns]
 }
 
-resource "null_resource" "install_flagger" {
+resource "terraform_data" "install_flagger" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
     command = "helm repo add flagger https://flagger.app"
@@ -209,23 +171,23 @@ resource "null_resource" "install_flagger" {
     interpreter = ["bash", "-exc"]
     command = "kubectl apply -k ../flagger/"
   }
-  depends_on = [null_resource.install_istio]
+  depends_on = [terraform_data.install_istio]
 }
 
-resource "null_resource" "apply_prometheus_and_kiali" {
+resource "terraform_data" "apply_prometheus_and_kiali" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
     command = "kubectl apply -k ../flagger/ && kubectl apply -k ../flagger/metrics/"
   }
-  depends_on = [null_resource.install_flagger]
+  depends_on = [terraform_data.install_flagger]
 }
 
-resource "null_resource" "create_hawk_namespace" {
+resource "terraform_data" "create_hawk_namespace" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
     command = "kubectl create ns hawk-ns"
   }
-  depends_on = [null_resource.apply_prometheus_and_kiali]
+  depends_on = [terraform_data.apply_prometheus_and_kiali]
 }
 
 #resource "null_resource" "install_hawk" {
@@ -240,14 +202,12 @@ resource "null_resource" "create_hawk_namespace" {
 #  depends_on = [null_resource.apply_prometheus_and_kiali]
 #}
 
-resource "null_resource" "install_flux" {
+resource "terraform_data" "install_flux" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
     command = "flux install --components-extra image-reflector-controller,image-automation-controller"
   }
-  depends_on = [
-    null_resource.apply_prometheus_and_kiali
-  ]
+  depends_on = [terraform_data.apply_prometheus_and_kiali]
 }
 
 ## Flux bootstrap
@@ -258,12 +218,12 @@ resource "null_resource" "install_flux" {
 #  depends_on = [null_resource.install_flux]
 #}
 
-resource "null_resource" "bootstrap_repo" {
+resource "terraform_data" "bootstrap_repo" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
     command = "export GITHUB_TOKEN=${var.github_token} && flux bootstrap github --components-extra=image-reflector-controller,image-automation-controller --owner=${var.github_org} --repository=${var.github_repository} --path=${var.target_path} --branch=${var.branch}"
   }
-  depends_on = [null_resource.install_flux]
+  depends_on = [terraform_data.fetch_aws_endpoint, terraform_data.install_flux]
 }
 
 #resource "flux_bootstrap_git" "this" {
@@ -283,52 +243,34 @@ resource "null_resource" "bootstrap_repo" {
 #}
 
 
-#resource "null_resource" "apply_deployment" {
+#resource "terraform_data" "apply_deployment" {
 #  provisioner "local-exec" {
 #    interpreter = ["bash", "-exc"]
 #    command = "kubectl apply -k ../apps/"
 #  }
-#  depends_on = [flux_bootstrap_git.this]
+#  depends_on = [terraform_data.bootstrap_repo]
 #}
-#
-#resource "null_resource" "install_opa_gatekeeper" {
-#  provisioner "local-exec" {
-#    interpreter = ["bash", "-exc"]
-#    command = "helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts && helm install gatekeeper/gatekeeper --name-template=gatekeeper --namespace gatekeeper-system --create-namespace"
-#  }
-#  depends_on = [
-#    null_resource.apply_deployment
-#  ]
-#}
-#
-#resource "null_resource" "apply_opa_templates" {
-#  provisioner "local-exec" {
-#    interpreter = ["bash", "-exc"]
-#    command = "kubectl apply -f ../gatekeeper-policies/templates/complex-template.yaml"
-#  }
-#  depends_on = [null_resource.install_opa_gatekeeper]
-#}
-#
-#resource "null_resource" "apply_opa_constraints" {
-#  provisioner "local-exec" {
-#    interpreter = ["bash", "-exc"]
-#    command = "kubectl apply -f ../gatekeeper-policies/constraints/complex-constraint.yaml"
-#  }
-#  depends_on = [
-#    null_resource.apply_opa_constraints
-#  ]
-#}
-#
-##resource "null_resource" "wait_conditions" {
-##  provisioner "local-exec" {
-##    interpreter = ["bash", "-exc"]
-##    command = "kubectl wait --for=condition=ready pods --all -n sock-shop --timeout=-1s 2> /dev/null"
-##  }
-##
-##  depends_on = [
-##    module.eks, null_resource.install_istio, null_resource.apply_flagger, null_resource.install_flux,
-##    null_resource.fetch_aws_endpoint, null_resource.apply_deployment, null_resource.install_opa_gatekeeper,
-##    null_resource.apply_opa_templates
-##  ]
-##}
 
+resource "terraform_data" "install_opa_gatekeeper" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts && helm install gatekeeper/gatekeeper --name-template=gatekeeper --namespace gatekeeper-system --create-namespace"
+  }
+  depends_on = [terraform_data.bootstrap_repo]
+}
+
+resource "terraform_data" "apply_opa_templates" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "kubectl apply -f ../gatekeeper-policies/templates/complex-template.yaml"
+  }
+  depends_on = [terraform_data.install_opa_gatekeeper]
+}
+
+resource "terraform_data" "apply_opa_constraints" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "kubectl apply -f ../gatekeeper-policies/constraints/complex-constraint.yaml"
+  }
+  depends_on = [terraform_data.apply_opa_templates]
+}

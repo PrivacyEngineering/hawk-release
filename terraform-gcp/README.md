@@ -58,7 +58,6 @@ The cluster has the following settings:
 
 •	Total memory: 90GB
 
-
 •	Location type: Zonal
 
 •	Machine type: n1-standard-8
