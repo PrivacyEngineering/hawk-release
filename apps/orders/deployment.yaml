@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
+    serviceType: DB
+    geo: FR
     cat-DB: "true"
     geo-DE: "true"
     name: orders
