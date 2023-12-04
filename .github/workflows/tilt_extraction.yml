@@ -1,0 +1,84 @@
+name: Tilt Extraction
+
+on:
+  push:
+    paths:
+      - 'tilt.json'
+      
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  update-deployment:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+
+    - name: Set up JQ
+      run: sudo apt-get install jq
+
+    - name: Extract country and update deployment.yaml
+      run: |
+        # Extract country from tilt.json
+        COUNTRIES=$(jq -r '.dataDisclosed[]?.recipients[]?.country | select(.!=null)' tilt.json)
+        
+        # Print the extracted countries
+        echo "Extracted Countries: $COUNTRIES"
+        
+        # Check if there are any countries extracted
+        if [ -n "$COUNTRIES" ]; then
+            # Update deployment.yaml for each country
+            for COUNTRY in $COUNTRIES; do
+                LABEL="geo: $COUNTRY"
+
+                # Check and append the label with correct indentation under metadata/labels. Only does this at the first instance of labels and not for subsequent instances. 
+                # IMPORTANT: This assumes that the labels are indented with 4 spaces. If the indentation is different, this will not work.
+                # ALSO: This assumes that the labels are the first entry under metadata. If the labels are under some other section or not the first entry, this will not work. 
+
+                # Update the deployment.yaml files
+                for FILE in apps/catalogue/deployment.yaml apps/orders/deployment.yaml apps/payment/deployment.yaml apps/shipping/deployment.yaml; do
+                  awk -v label="$LABEL" 'BEGIN {append=0} /metadata:/ {print; getline; if ($1 == "labels:" && append == 0) {print; print "    " label; append=1; next}}1' $FILE > ${FILE}_temp && mv ${FILE}_temp $FILE
+                done
+            done
+        fi
+
+    - name: Extract category and update deployment.yaml
+      run: |
+        # Extract category from tilt.json
+        CATEGORIES=$(jq -r '.dataDisclosed[]?.recipients[]?.category | select(.!=null)' tilt.json)
+        
+        # Print the extracted categories
+        echo "Extracted Categories: $CATEGORIES"
+        
+        # Check if there are any categories extracted
+        if [ -n "$CATEGORIES" ]; then
+            # Update deployment.yaml for each category
+            for CATEGORY in $CATEGORIES; do
+                LABEL="serviceType: $CATEGORY"
+                # Check and append the label with correct indentation under metadata/labels. Only does this at the first instance of labels and not for subsequent instances. 
+                # IMPORTANT: This assumes that the labels are indented with 4 spaces. If the indentation is different, this will not work.
+                # ALSO: This assumes that the labels are the first entry under metadata. If the labels are under some other section or not the first entry, this will not work. 
+
+                # Update the deployment.yaml files
+                for FILE in apps/catalogue/deployment.yaml apps/orders/deployment.yaml apps/payment/deployment.yaml apps/shipping/deployment.yaml; do
+                  awk -v label="$LABEL" 'BEGIN {append=0} /metadata:/ {print; getline; if ($1 == "labels:" && append == 0) {print; print "    " label; append=1; next}}1' $FILE > ${FILE}_temp && mv ${FILE}_temp $FILE
+                done
+            done
+        fi
+
+    - name: Commit and push if changed
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+      
+        # Add every potentially modified deployment.yaml file
+        git add apps/catalogue/deployment.yaml
+        git add apps/orders/deployment.yaml
+        git add apps/payment/deployment.yaml
+        git add apps/shipping/deployment.yaml
+  
+        # Commit and push if there are any changes
+        git diff-index --quiet HEAD || git commit -m "Add tilt-labels to deployment files"
+        git push

@@ -1,11 +1,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: payment
   labels:
+    cat-DB: "true"
+    geo-DE: "true"
     name: payment
     app: payment
     version: v1
+  name: payment
   namespace: sock-shop
 spec:
   selector:
@@ -24,7 +26,8 @@ spec:
     spec:
       containers:
       - name: payment
-        image: europe-west3-docker.pkg.dev/toucan-378111/toucan/payment:latest
+#        image: europe-west3-docker.pkg.dev/toucan-378111/toucan/payment:latest
+        image: ghcr.io/siar-akbayin/payment:0.4.3
         resources:
           limits:
             cpu: 200m

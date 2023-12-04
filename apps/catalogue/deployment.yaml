@@ -1,11 +1,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: catalogue
   labels:
+    cat-DB: "true"
+    geo-DE: "true"
     name: catalogue
     app: catalogue
     version: v1
+  name: catalogue
   namespace: sock-shop
 spec:
   replicas: 1
@@ -25,7 +27,8 @@ spec:
     spec:
       containers:
       - name: catalogue
-        image: europe-west3-docker.pkg.dev/toucan-378111/toucan/catalogue:latest
+#        image: europe-west3-docker.pkg.dev/toucan-378111/toucan/catalogue:latest
+        image: ghcr.io/siar-akbayin/catalogue:0.3.5
         command: ["/app"]
         args:
         - -port=8080

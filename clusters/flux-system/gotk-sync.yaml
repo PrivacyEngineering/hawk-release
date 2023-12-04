@@ -8,7 +8,7 @@ metadata:
 spec:
   interval: 10m0s
   ref:
-    branch: master
+    branch: opa-gatekeeper
   secretRef:
     name: flux-system
   url: https://github.com/PrivacyEngineering/hawk-release

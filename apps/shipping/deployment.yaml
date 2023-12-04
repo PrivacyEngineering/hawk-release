@@ -1,11 +1,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: shipping
   labels:
+    cat-DB: "true"
+    geo-DE: "true"
     name: shipping
     app: shipping
     version: v1
+  name: shipping
   namespace: sock-shop
 spec:
   selector:
@@ -24,7 +26,8 @@ spec:
     spec:
       containers:
       - name: shipping
-        image: europe-west3-docker.pkg.dev/toucan-378111/toucan/shipping:latest
+#        image: europe-west3-docker.pkg.dev/toucan-378111/toucan/shipping:latest
+        image: ghcr.io/siar-akbayin/shipping:0.4.8
         env:
          - name: ZIPKIN
            value: zipkin.jaeger.svc.cluster.local

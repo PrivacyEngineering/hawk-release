@@ -25,7 +25,7 @@ spec:
     trafficPolicy:
       tls:
         # use ISTIO_MUTUAL when mTLS is enabled
-        mode: ISTIO_MUTUAL
+        mode: DISABLE
   analysis:
     # schedule interval (default 60s)
     interval: 30s
@@ -38,12 +38,12 @@ spec:
     # promotion increment step (default 100)
     stepWeightPromotion: 100
 
-    alerts:
-      - name: "on-call Discord"
-        severity: info
-        providerRef:
-          name: on-call
-          namespace: flux-system
+#    alerts:
+#      - name: "on-call Discord"
+#        severity: info
+#        providerRef:
+#          name: on-call
+#          namespace: flux-system
     #Built in Flagger metrics
 #    webhooks:
       #gate waits for status code 200 from an url. If it gets 403, rollout

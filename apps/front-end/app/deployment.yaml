@@ -6,6 +6,7 @@ metadata:
   labels:
     app: frontend
 spec:
+  replicas: 1
   progressDeadlineSeconds: 180
   strategy:
     rollingUpdate:
@@ -24,7 +25,8 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: europe-west3-docker.pkg.dev/toucan-378111/toucan/front-end:1.0.0 # {"$imagepolicy": "flux-system:frontend"}
+        image: ghcr.io/siar-akbayin/front-end:0.3.12
+#        image: europe-west3-docker.pkg.dev/toucan-378111/toucan/front-end:1.0.0 # {"$imagepolicy": "flux-system:frontend"}
         imagePullPolicy: IfNotPresent
         resources:
           limits:
