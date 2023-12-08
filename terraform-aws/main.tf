@@ -14,6 +14,7 @@ terraform {
     }
   }
 }
+
 #provider "flux" {
 #  kubernetes = {
 #    config_path = "~/.kube/config"
@@ -97,19 +98,25 @@ resource "aws_security_group" "my-security-group" {
   }
 }
 
+#output "security_group_id" {
+#  value = aws_security_group.my-security-group.id
+#  depends_on = [aws_security_group.my-security-group]
+#}
+
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "19.15.3"
+  version = "~> 19.0"
 
   cluster_name    = "hawk-release"
   cluster_version = "1.28"
 
-  subnet_ids      = ["subnet-0cf8af7fb83e9214c", "subnet-099b18565de436a67", "subnet-002f1b128ecb07d50"]
+  vpc_id = "vpc-0f2d9adf03961f221"
+  subnet_ids      = ["subnet-028b97041fb0039d2", "subnet-0692049a797200744", "subnet-08caccd9e5f668d89"]
   cluster_endpoint_public_access = true
 
   eks_managed_node_group_defaults = {
     ami_type = "AL2_x86_64"
-
+    instance_types = ["t3.large"]
   }
 
   eks_managed_node_groups = {
@@ -118,12 +125,13 @@ module "eks" {
 
       instance_types = ["t3.large"]
       min_size     = 1
-      max_size     = 8
+      max_size     = 4
       desired_size = 2
 
       vpc_security_group_ids = [aws_security_group.my-security-group.id]
     }
   }
+  depends_on = [aws_security_group.my-security-group]
 }
 
 resource "terraform_data" "fetch_aws_endpoint" {
@@ -159,7 +167,7 @@ data "external" "istio_ingress_ip" {
   depends_on = [terraform_data.install_istio]
 }
 
-output "ingress_gateway_ip" {
+output "istio_ingress_gateway_ip" {
   value = data.external.istio_ingress_ip.result.ingress_gateway_ip
   depends_on = [data.external.istio_ingress_ip]
 }
@@ -193,12 +201,34 @@ resource "terraform_data" "apply_prometheus_and_kiali" {
   depends_on = [terraform_data.install_flagger]
 }
 
-resource "terraform_data" "create_hawk_namespace" {
+#resource "terraform_data" "create_hawk_namespace" {
+#  provisioner "local-exec" {
+#    interpreter = ["bash", "-exc"]
+#    command = "kubectl create ns hawk-ns"
+#  }
+#  depends_on = [terraform_data.apply_prometheus_and_kiali]
+#}
+
+resource "terraform_data" "install_nginx_ingress" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command = "kubectl create ns hawk-ns"
+    command = "kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/aws/deploy.yaml"
+  }
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "sleep 30"
   }
   depends_on = [terraform_data.apply_prometheus_and_kiali]
+}
+
+data "external" "nginx_ingress_ip" {
+  program = ["bash", "-c", "kubectl get svc -n ingress-nginx ingress-nginx-controller -o json | jq -n '{ ingress_gateway_ip: input.status.loadBalancer.ingress[0].hostname }'"]
+  depends_on = [terraform_data.install_istio]
+}
+
+output "nginx_ingress_gateway_ip" {
+  value = data.external.nginx_ingress_ip.result.ingress_gateway_ip
+  depends_on = [data.external.nginx_ingress_ip]
 }
 
 resource "terraform_data" "install_hawk" {
@@ -208,9 +238,9 @@ resource "terraform_data" "install_hawk" {
   }
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command = "helm install hawk hawk/hawk --namespace hawk --create-namespace"
+    command = "helm install hawk hawk/hawk --namespace hawk-ns --set ingress.host=\"\" --set monitor.apiUrl=\"\" --create-namespace"
   }
-  depends_on = [terraform_data.apply_prometheus_and_kiali]
+  depends_on = [terraform_data.install_nginx_ingress]
 }
 
 resource "terraform_data" "install_flux" {
@@ -218,7 +248,7 @@ resource "terraform_data" "install_flux" {
     interpreter = ["bash", "-exc"]
     command = "flux install --components-extra image-reflector-controller,image-automation-controller"
   }
-  depends_on = [terraform_data.apply_prometheus_and_kiali]
+  depends_on = [terraform_data.install_hawk]
 }
 
 ## Flux bootstrap
