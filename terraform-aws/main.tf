@@ -154,6 +154,17 @@ resource "terraform_data" "install_istio" {
   depends_on = [terraform_data.apply_sock-shop_ns]
 }
 
+data "external" "istio_ingress_ip" {
+  program = ["bash", "-c", "kubectl get svc -n istio-system istio-ingressgateway -o json | jq -n '{ ingress_gateway_ip: input.status.loadBalancer.ingress[0].hostname }'"]
+  depends_on = [terraform_data.install_istio]
+}
+
+output "ingress_gateway_ip" {
+  value = data.external.istio_ingress_ip.result.ingress_gateway_ip
+  depends_on = [data.external.istio_ingress_ip]
+}
+
+
 resource "terraform_data" "install_flagger" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
@@ -190,17 +201,17 @@ resource "terraform_data" "create_hawk_namespace" {
   depends_on = [terraform_data.apply_prometheus_and_kiali]
 }
 
-#resource "null_resource" "install_hawk" {
-#  provisioner "local-exec" {
-#    interpreter = ["bash", "-exc"]
-#    command = "helm repo add hawk https://privacyengineering.github.io/hawk-helm-charts/"
-#  }
-#  provisioner "local-exec" {
-#    interpreter = ["bash", "-exc"]
-#    command = "helm install hawk hawk/hawk --namespace hawk --create-namespace"
-#  }
-#  depends_on = [null_resource.apply_prometheus_and_kiali]
-#}
+resource "terraform_data" "install_hawk" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "helm repo add hawk https://privacyengineering.github.io/hawk-helm-charts/"
+  }
+  provisioner "local-exec" {
+    interpreter = ["bash", "-exc"]
+    command = "helm install hawk hawk/hawk --namespace hawk --create-namespace"
+  }
+  depends_on = [terraform_data.apply_prometheus_and_kiali]
+}
 
 resource "terraform_data" "install_flux" {
   provisioner "local-exec" {
@@ -234,12 +245,12 @@ resource "terraform_data" "bootstrap_repo" {
 #  ]
 #}
 
-#resource "null_resource" "apply_flux_resources" {
+#resource "terraform_data" "apply_flux_resources" {
 #  provisioner "local-exec" {
 #    interpreter = ["bash", "-exc"]
 #    command = "kubectl apply -k ../clusters/sock-shop/"
 #  }
-#  depends_on = [null_resource.install_flux]
+#  depends_on = [terraform_data.install_flux]
 #}
 
 
@@ -262,7 +273,7 @@ resource "terraform_data" "install_opa_gatekeeper" {
 resource "terraform_data" "apply_opa_templates" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command = "kubectl apply -f ../gatekeeper-policies/templates/complex-template.yaml"
+    command = "kubectl apply -f ../gatekeeper-policies/templates/db-us-template.yaml"
   }
   depends_on = [terraform_data.install_opa_gatekeeper]
 }
@@ -270,7 +281,7 @@ resource "terraform_data" "apply_opa_templates" {
 resource "terraform_data" "apply_opa_constraints" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
-    command = "kubectl apply -f ../gatekeeper-policies/constraints/complex-constraint.yaml"
+    command = "kubectl apply -f ../gatekeeper-policies/constraints/db-us-constraint.yaml"
   }
   depends_on = [terraform_data.apply_opa_templates]
 }
