@@ -223,7 +223,7 @@ resource "terraform_data" "install_nginx_ingress" {
 
 data "external" "nginx_ingress_ip" {
   program = ["bash", "-c", "kubectl get svc -n ingress-nginx ingress-nginx-controller -o json | jq -n '{ ingress_gateway_ip: input.status.loadBalancer.ingress[0].hostname }'"]
-  depends_on = [terraform_data.install_istio]
+  depends_on = [terraform_data.install_nginx_ingress]
 }
 
 output "nginx_ingress_gateway_ip" {
