@@ -5,3 +5,10 @@ resources:
   - istio-kustomization.yaml
   - sock-shop-kustomization.yaml
   - sock-shop-source.yaml
+  - notification-alert.yaml
+  - notification-provider.yaml
+  - notification-receiver.yaml
+  - notification-service.yaml
+  - sock-shop-registry.yaml
+  - flux-system-automation.yaml
+  - my-secrets-kustomization.yaml

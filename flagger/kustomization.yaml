@@ -4,4 +4,4 @@ namespace: sock-shop
 resources:
   - loadtester-svc.yaml
   - loadtester.yaml
-#  - notification.yaml
+  - notification.yaml
