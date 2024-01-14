@@ -9,6 +9,6 @@ resources:
   - notification-provider.yaml
   - notification-receiver.yaml
   - notification-service.yaml
-  - sock-shop-registry.yaml
-  - flux-system-automation.yaml
+#  - sock-shop-registry.yaml
+#  - flux-system-automation.yaml
   - my-secrets-kustomization.yaml
