@@ -12,4 +12,3 @@ resources:
 #  - sock-shop-registry.yaml
 #  - flux-system-automation.yaml
   - my-secrets-kustomization.yaml
-  - my-secrets.yaml
