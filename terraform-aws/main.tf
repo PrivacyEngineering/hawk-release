@@ -15,74 +15,10 @@ terraform {
   }
 }
 
-#provider "helm" {
-#  kubernetes {
-#    config_path = "~/.kube/config"
-#  }
-#}
-#provider "flux" {
-#  kubernetes = {
-#    config_path = "~/.kube/config"
-#  }
-#  git = {
-#    url = "https://github.com/PrivacyEngineering/hawk-release"
-#    http = {
-#      username = var.github_org
-#      password = var.github_token
-#    }
-#    branch = "master"
-#    #    url  = "ssh://git@github.com/${var.github_org}/${var.github_repository}.git"
-#    ##    url  = var.repository_ssh_url
-#    #    ssh = {
-#    #      username    = "git"
-#    #      private_key = tls_private_key.flux.private_key_pem
-#    #    }
-#  }
-#}
-
 # Configure the AWS Provider
 provider "aws" {
-  region = "eu-central-1"
+  region = var.region
 }
-
-#provider "flux" {
-#  kubernetes = {
-#    config_path = "~/.kube/config"
-#  }
-#  git = {
-#    url = "ssh://git@github.com/${var.github_org}/${var.github_repository}.git"
-#    ssh = {
-#      username = "git"
-#      private_key = tls_private_key.flux.private_key_pem
-#    }
-#    branch = var.branch
-#  }
-#}
-
-#resource "tls_private_key" "flux" {
-#  algorithm   = "ECDSA"
-#  ecdsa_curve = "P256"
-#}
-
-#provider "github" {
-#  owner = var.github_org
-#  token = var.github_token
-#}
-
-#resource "github_repository_deploy_key" "this" {
-#  title      = "Flux"
-#  repository = var.github_repository
-#  key        = tls_private_key.flux.public_key_openssh
-#  read_only  = "false"
-#}
-
-#output "endpoint" {
-#  value = aws_eks_cluster.example.endpoint
-#}
-#
-#output "kubeconfig-certificate-authority-data" {
-#  value = aws_eks_cluster.example.certificate_authority[0].data
-#}
 
 resource "aws_security_group" "my-security-group" {
   name        = "my-security-group"
@@ -102,11 +38,6 @@ resource "aws_security_group" "my-security-group" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-
-#output "security_group_id" {
-#  value = aws_security_group.my-security-group.id
-#  depends_on = [aws_security_group.my-security-group]
-#}
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"

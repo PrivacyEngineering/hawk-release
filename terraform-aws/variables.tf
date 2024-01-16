@@ -11,11 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-variable "gcp_project_id" {
-  type        = string
-  description = "The GCP project ID to apply this config to"
-}
-
 variable "name" {
   type        = string
   description = "Name given to the new GKE cluster"
@@ -25,13 +20,7 @@ variable "name" {
 variable "region" {
   type        = string
   description = "Region of the new GKE cluster"
-  default     = "us-east1"
-}
-
-variable "zone" {
-  type        = string
-  description = "Region of the new GKE cluster"
-  default     = "us-east1-c"
+  default     = "eu-central-1"
 }
 
 variable "namespace_sock_shop" {
@@ -76,19 +65,21 @@ variable "node_count" {
 }
 
 variable "repository_ssh_url" {
-  description = "hawk-release GitHub repository ssh url"
+  description = "GitHub repository ssh url"
   type = string
   default = "git@github.com:PrivacyEngineering/hawk-release.git"
 }
 
 variable "github_org" {
-  description = "GitHub organization name"
+  description = "GitHub organization or user name"
   type = string
+  default = "PrivacyEngineering"
 }
 
 variable "github_repository" {
   description = "GitHub repository name"
   type = string
+  default = "hawk-release"
 }
 
 variable "github_token" {
@@ -103,12 +94,12 @@ variable "github_token" {
 
 variable "branch" {
   type        = string
-  default     = "opa-gatekeeper"
   description = "branch name"
+  default     = "master"
 }
 
 variable "target_path" {
   type        = string
-  default     = "clusters"
   description = "flux sync target path"
+  default     = "./clusters"
 }

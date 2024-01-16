@@ -38,7 +38,7 @@ or set the gcp_project_id in the terraform.tfvars manually.
 
 The provided Terraform files can now be used to create your Kubernetes cluster in your GCP project.
 
-Navigate to the terraform folder (cd terraform) and run the following commands:
+Navigate to the terraform-gcp folder and run the following commands:
 ```shell
 terraform init
 ```
