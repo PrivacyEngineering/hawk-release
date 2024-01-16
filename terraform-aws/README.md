@@ -32,7 +32,9 @@ Navigate to the terraform-aws folder and run the following commands:
 terraform init
 ```
 ```shell
-terraform apply -target=aws_security_group.my-security-group -var="github_token=$GITHUB_TOKEN" -auto-approve &&  terraform apply -var="github_token=$GITHUB_TOKEN -auto-approve
+terraform apply -target=aws_security_group.my-security-group -var="github_token=$GITHUB_TOKEN" -auto-approve &&  
+
+terraform apply -var="github_token=$GITHUB_TOKEN -auto-approve
 ```
 
 Now your cluster will be created which can take up to 20 minutes.
