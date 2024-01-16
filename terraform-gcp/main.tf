@@ -27,26 +27,6 @@ provider "google-beta" {
   zone        = var.zone
 }
 
-#provider "flux" {
-#  kubernetes = {
-#    config_path = "~/.kube/config"
-#  }
-#  git = {
-#    url = "https://github.com/PrivacyEngineering/hawk-release"
-#    http = {
-#      username = var.github_org
-#      password = var.github_token
-#    }
-#    branch = "master"
-##    url  = "ssh://git@github.com/${var.github_org}/${var.github_repository}.git"
-###    url  = var.repository_ssh_url
-##    ssh = {
-##      username    = "git"
-##      private_key = tls_private_key.flux.private_key_pem
-##    }
-#  }
-#}
-
 module "enable_google_apis" {
   source  = "terraform-google-modules/project-factory/google//modules/project_services"
   version = "~> 14.0"
@@ -142,21 +122,12 @@ resource "null_resource" "install_flux" {
   ]
 }
 
-#resource "flux_bootstrap_git" "this" {
-#  path = "clusters"
-#  components_extra = ["image-automation-controller", "image-reflector-controller"]
-#  depends_on = [
-#    github_repository_deploy_key.this, google_container_cluster.sock-shop, module.gcloud
-#  ]
-#}
-
 resource "null_resource" "apply_flux_resources_1" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
     command = "kubectl apply -k ../clusters/flux-system/"
   }
   depends_on = [
-#    github_repository_deploy_key.this,
     google_container_cluster.sock-shop, module.gcloud, null_resource.install_flux
   ]
 }
@@ -167,42 +138,7 @@ resource "null_resource" "apply_flux_resources_2" {
     command = "kubectl apply -k ../clusters/"
   }
   depends_on = [
-#    github_repository_deploy_key.this,
     google_container_cluster.sock-shop, module.gcloud, null_resource.install_flux, null_resource.apply_flux_resources_1
   ]
 }
-
-
-#
-#resource "null_resource" "apply_istio" {
-#  provisioner "local-exec" {
-#    interpreter = ["bash", "-exc"]
-#    command = "kubectl apply -k ${var.filepath_istio} -n istio-system"
-#  }
-#  depends_on = [
-#    module.gcloud, null_resource.install_istio
-#  ]
-#}
-#
-#
-#resource "null_resource" "apply_deployment" {
-#  provisioner "local-exec" {
-#    interpreter = ["bash", "-exc"]
-#    command = "kubectl apply -k ../apps -n sock-shop"
-#  }
-#  depends_on = [
-#    module.gcloud, null_resource.apply_istio, null_resource.apply_flagger
-#  ]
-#}
-#
-#resource "null_resource" "wait_conditions" {
-#  provisioner "local-exec" {
-#    interpreter = ["bash", "-exc"]
-#    command = "kubectl wait --for=condition=ready pods --all -n sock-shop --timeout=-1s 2> /dev/null"
-#  }
-#
-#  depends_on = [
-#    module.gcloud, null_resource.apply_deployment
-#  ]
-#}
 

@@ -137,14 +137,6 @@ resource "terraform_data" "apply_prometheus_and_kiali" {
   depends_on = [terraform_data.install_flagger]
 }
 
-#resource "terraform_data" "create_hawk_namespace" {
-#  provisioner "local-exec" {
-#    interpreter = ["bash", "-exc"]
-#    command = "kubectl create ns hawk-ns"
-#  }
-#  depends_on = [terraform_data.apply_prometheus_and_kiali]
-#}
-
 resource "terraform_data" "install_nginx_ingress" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
@@ -187,14 +179,6 @@ resource "terraform_data" "install_flux" {
   depends_on = [terraform_data.install_hawk]
 }
 
-## Flux bootstrap
-#resource "flux_bootstrap_git" "this" {
-#  path = var.target_path
-#  components_extra = ["image-reflector-controller", "image-automation-controller"]
-#  interval = "10m0s"
-#  depends_on = [null_resource.install_flux]
-#}
-
 resource "terraform_data" "bootstrap_repo" {
   provisioner "local-exec" {
     interpreter = ["bash", "-exc"]
@@ -202,31 +186,6 @@ resource "terraform_data" "bootstrap_repo" {
   }
   depends_on = [terraform_data.fetch_aws_endpoint, terraform_data.install_flux]
 }
-
-#resource "flux_bootstrap_git" "this" {
-#  path = "clusters"
-#  components_extra = ["image-automation-controller", "image-reflector-controller"]
-#  depends_on = [
-#    github_repository_deploy_key.this
-#  ]
-#}
-
-#resource "terraform_data" "apply_flux_resources" {
-#  provisioner "local-exec" {
-#    interpreter = ["bash", "-exc"]
-#    command = "kubectl apply -k ../clusters/sock-shop/"
-#  }
-#  depends_on = [terraform_data.install_flux]
-#}
-
-
-#resource "terraform_data" "apply_deployment" {
-#  provisioner "local-exec" {
-#    interpreter = ["bash", "-exc"]
-#    command = "kubectl apply -k ../apps/"
-#  }
-#  depends_on = [terraform_data.bootstrap_repo]
-#}
 
 resource "terraform_data" "install_opa_gatekeeper" {
   provisioner "local-exec" {
